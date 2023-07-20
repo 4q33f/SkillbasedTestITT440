@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+int main() {
+    int client_socket;
+    struct sockaddr_in server_addr;
+    char buffer[1024];
+
+    // Create socket
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure server address and port
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("192.168.177.128"); 
+    server_addr.sin_port = htons(8080); 
+
+    // Connect to the server
+    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error connecting to server");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Receive data from the server
+    int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
+    if (bytes_received == -1) {
+        perror("Error receiving data");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Null-terminate the received data
+    buffer[bytes_received] = '\0';
+
+    // Convert the received data to an integer and display it
+    int random_number = atoi(buffer);
+    printf("Received random number from server: %d\n", random_number);
+
+    // Close the socket and exit
+    close(client_socket);
+    return 0;
+}
+                                                                                      [ Read 49 lines 
